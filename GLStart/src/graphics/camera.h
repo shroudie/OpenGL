@@ -10,6 +10,6 @@ public:
 	void initViewParams();
 	~Camera();
 private:
-	vec3 cameraPos, viewDir, up, center;
+	vec3 position, direction, up;
 };
 
