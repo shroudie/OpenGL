@@ -29,10 +29,13 @@
     <ClCompile Include="src\imgui\imgui_impl_glfw.cpp" />
     <ClCompile Include="src\imgui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="src\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="src\layers\layer.cpp" />
+    <ClCompile Include="src\layers\solid.cpp" />
     <ClCompile Include="src\Main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\graphics\camera.h" />
+    <ClInclude Include="src\graphics\imguiWindow.h" />
     <ClInclude Include="src\graphics\shader.h" />
     <ClInclude Include="src\imgui\imconfig.h" />
     <ClInclude Include="src\imgui\imgui.h" />
@@ -42,9 +45,12 @@
     <ClInclude Include="src\imgui\imstb_rectpack.h" />
     <ClInclude Include="src\imgui\imstb_textedit.h" />
     <ClInclude Include="src\imgui\imstb_truetype.h" />
+    <ClInclude Include="src\layers\layer.h" />
+    <ClInclude Include="src\layers\solid.h" />
     <ClInclude Include="src\maths\mat4.h" />
     <ClInclude Include="src\graphics\window.h" />
     <ClInclude Include="src\maths\maths.h" />
+    <ClInclude Include="src\maths\vec2.h" />
     <ClInclude Include="src\maths\vec3.h" />
     <ClInclude Include="src\utils.h" />
   </ItemGroup>
