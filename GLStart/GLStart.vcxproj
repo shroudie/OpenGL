@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="..\Dependencies\glad\include\glad\glad.c" />
     <ClCompile Include="src\graphics\camera.cpp" />
+    <ClCompile Include="src\graphics\imGuiContainer.cpp" />
     <ClCompile Include="src\graphics\shader.cpp" />
     <ClCompile Include="src\graphics\window.cpp" />
     <ClCompile Include="src\imgui\imgui.cpp" />
@@ -35,7 +36,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\graphics\camera.h" />
-    <ClInclude Include="src\graphics\imguiWindow.h" />
+    <ClInclude Include="src\graphics\imGuiContainer.h" />
     <ClInclude Include="src\graphics\shader.h" />
     <ClInclude Include="src\imgui\imconfig.h" />
     <ClInclude Include="src\imgui\imgui.h" />
@@ -52,6 +53,7 @@
     <ClInclude Include="src\maths\maths.h" />
     <ClInclude Include="src\maths\vec2.h" />
     <ClInclude Include="src\maths\vec3.h" />
+    <ClInclude Include="src\test.h" />
     <ClInclude Include="src\utils.h" />
   </ItemGroup>
   <ItemGroup>

@@ -11,17 +11,17 @@ int main(void)
 }*/
 
 
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
 #include "graphics/shader.h"
 #include "graphics/window.h"
 #include "graphics/camera.h"
-#include "graphics/imguiWindow.h"
+#include "graphics/imGuiContainer.h"
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
 #include "layers/solid.h"
+
+#include "test.h"
 
 static const GLfloat g_vertex_buffer_data[] = {
    -1.0f, -1.0f, 0.0f,
@@ -34,12 +34,11 @@ static const GLint g_index_buffer_data[] = {
    2, 1, 3,
 };
 
-
-
 int main(void)
 {
+
 	if (!glfwInit())
-		exit(EXIT_FAILURE);
+		::exit(EXIT_FAILURE);
 	Window window("Test", 960, 540);
 	Shader shader("src/shaders/shader.vert", "src/shaders/shader.frag");
 	GLuint program = shader.load_shaders();
@@ -67,24 +66,25 @@ int main(void)
 	shader.upload_vw_matrix(view);
 	shader.upload_ml_matrix(model);
 	
-	ImGuiWindow::init_window_content(window.get_glfwWindow());
+	ImGuiContainers::init_window_content(window.get_glfwWindow());
 	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
 	vec3 viewDir(0.f, 0.f, -1.f);
-	bool show_demo_window = true, show_another_window = false;
 	float x = 0.f, y = 0.f, z = 0.f;
 	bool fixed = false;
 
-	ImGuiWindow imwindow;
+	ImGuiContainers imguis;
 
 	while (!window.closed()) {
 		window.clear();
 
-		ImGuiWindow::new_frame();
+		ImGuiContainers::new_frame();
+
+		//ImGui::ShowDemoWindow();
 
 		//	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
 		//	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-		imwindow.setup_menu();
+		imguis.setup_menu();
 
 		if (fixed) {
 			view = mat4::look_at(vec3(x, y, z), vec3(0.f, 0.f, 0.f), vec3(0.f, 1.f, 0.f));
@@ -93,14 +93,16 @@ int main(void)
 			view = mat4::look_at(vec3(x, y, z), target, vec3(0.f, 1.f, 0.f));
 		}
 		shader.upload_vw_matrix(view);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
 
-		ImGuiWindow::render();
+
+		imguis.render_layers();
+
+		ImGuiContainers::render();
 
 		glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
 		window.update();
 	}
 
-	ImGuiWindow::destroy();
-	exit(EXIT_SUCCESS);
+	ImGuiContainers::destroy();
+	::exit(EXIT_SUCCESS);
 }

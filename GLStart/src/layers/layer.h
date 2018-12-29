@@ -11,11 +11,14 @@ using namespace std;
 
 class Layer {
 public:
-	Layer() {}
+	Layer();
+	Layer(const char*);
+	~Layer();
 	void set_layer_name(const char *);
+	inline const char* get_layer_name() { return name; }
 
 protected:
 	vec3 position, anchor;
 	float opacity;
-	string name;
+	char* name;
 };

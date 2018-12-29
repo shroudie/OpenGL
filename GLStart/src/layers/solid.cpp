@@ -1,11 +1,18 @@
 #include "solid.h"
 
+Solid::Solid(const Solid& s) : Layer()
+{
+	this->shape = s.shape;
+	this->vertex = vector<GLfloat>(s.vertex);
+	this->color = vector<GLfloat>(s.vertex);
+}
+
 Solid::Solid(int shape) : Layer()
 {
 	this->shape = shape;
 }
 
-Solid::Solid(vector<GLfloat> &v, vector<GLfloat> &c)
+Solid::Solid(vector<GLfloat> &v, vector<GLfloat> &c) : Layer()
 {
 	vertex = v;
 	color = c;
@@ -31,4 +38,10 @@ void Solid::bind()
 	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * color.size(), &color[0], GL_STATIC_DRAW); 
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
+}
+
+void Solid::draw()
+{
+	this->bind();
+	glDrawArrays(GL_TRIANGLES, 0, 3);
 }
