@@ -9,6 +9,7 @@
 class Shader
 {
 public:
+	Shader() {}
 	Shader(const char *, const char *);
 	GLuint load_shaders();
 	int init_matrices(const char*, const char*, const char*);

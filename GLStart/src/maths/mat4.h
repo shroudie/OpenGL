@@ -20,6 +20,14 @@ struct mat4
 		elements[15] = diagonal;
 	}
 
+	mat4& diagonal_scale(float s) {
+		elements[0] /= s;
+		elements[5] /= s;
+		elements[10] /= s;
+		elements[15] /= s;
+		return *this;
+	}
+
 	mat4& mult(const mat4 &other) {
 		float data[16];
 		for (int row = 0; row < 4; row++) {

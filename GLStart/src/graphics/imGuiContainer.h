@@ -7,6 +7,7 @@
 #include "../imgui/imgui_impl_opengl3.h"
 
 #include "../layers/solid.h"
+#include "../layers/curves/bezier.h"
 
 #define GLSL_VERSION "#version 130"
 
@@ -20,7 +21,7 @@ public:
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 	}
-
+	   
 	static void init_window_content(GLFWwindow *win) {
 		ImGui::CreateContext();
 		ImGuiIO& io = ImGui::GetIO(); (void)io;
@@ -59,12 +60,14 @@ public:
 			{
 				{
 					if (ImGui::MenuItem("solid")) {
+						cout << "solids" << endl;
 						vector<GLfloat> vertex = {
 							-1.f, -1.f, -5.f,
 							1.f, -1.f, -5.f,
 							0.f, 1.f, -5.f
 						};
 						float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+						cout << r << endl;
 						vector<GLfloat> color;
 						if (solids.size() % 2 == 0) {
 							color = {
@@ -89,6 +92,15 @@ public:
 						storage.push_back(counter);
 						cout << storage[counter] << endl;
 						counter += 1;
+						cout << "cout here: " << r << endl;
+					}
+					if (ImGui::BeginMenu("curves")) {
+						if (ImGui::MenuItem("Bezier Curve")) {
+							Point p0(-2.f, -2.f), p1(-2.f, 2.f), p2(2.f, 2.f), p3(2.f, -2.f);
+							Bezier *bezier_curve = new Bezier(p0, p1, p2, p3);
+							curves.push_back(bezier_curve);
+						}
+						ImGui::EndMenu();
 					}
 				}
 				ImGui::EndMenu();
@@ -134,11 +146,16 @@ public:
 		for (vector<Solid*>::reverse_iterator it = solids.rbegin(); it != solids.rend(); it++) {
 			(*it)->draw();
 		}
+		for (vector<Curve*>::reverse_iterator it = curves.rbegin(); it != curves.rend(); it++) {
+			(*it)->draw_curve();
+		}
 	}
 
 private:
 	vector<int> storage;
 	vector<Solid*> solids;
+	vector<Curve*> curves;
+
 	int counter = 0;
 
 	static void setup_menu_file() {

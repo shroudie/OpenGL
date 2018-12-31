@@ -22,6 +22,7 @@ int main(void)
 #include "layers/solid.h"
 
 #include "test.h"
+#include "utils.h"
 
 static const GLfloat g_vertex_buffer_data[] = {
    -1.0f, -1.0f, 0.0f,
@@ -34,13 +35,32 @@ static const GLint g_index_buffer_data[] = {
    2, 1, 3,
 };
 
+mat4 projection, view, model;
+Shader shader;
+
+static float global_scale = 1.f;
+static void mouse_scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+	if (yoffset < 0) {
+		if (global_scale < 0.1f) return;
+		global_scale /= 2.f;
+		model.diagonal_scale(global_scale);
+	}
+	else {
+		if (global_scale > 10.f) return;
+		global_scale *= 2.f;
+		model.diagonal_scale(global_scale);
+	}
+}
+
+
 int main(void)
 {
 
 	if (!glfwInit())
 		::exit(EXIT_FAILURE);
 	Window window("Test", 960, 540);
-	Shader shader("src/shaders/shader.vert", "src/shaders/shader.frag");
+	shader = Shader("src/shaders/shader.vert", "src/shaders/shader.frag");
 	GLuint program = shader.load_shaders();
 	shader.init_matrices("pr_matrix", "vw_matrix", "ml_matrix");
 
@@ -59,19 +79,21 @@ int main(void)
 */
 	glUseProgram(program);
 
-	mat4 projection = mat4::perspective_matrix(degreeToRadius(45.f), (float)window.getWidth() / (float)window.getHeight(), 0.1f, 200.f);
-	mat4 view = mat4::look_at(vec3(0.f, 0.f, 0.f), vec3(0.f, 0.f, 0.f), vec3(0.f, 1.f, 0.f));
-	mat4 model = mat4::identity_matrix();
+	projection = mat4::perspective_matrix(degreeToRadius(45.f), (float)window.getWidth() / (float)window.getHeight(), 0.1f, 200.f);
+	view = mat4::look_at(vec3(0.f, 0.f, 0.f), vec3(0.f, 0.f, 0.f), vec3(0.f, 1.f, 0.f));
+	model = mat4::identity_matrix();
 	shader.upload_pr_matrix(projection);
 	shader.upload_vw_matrix(view);
 	shader.upload_ml_matrix(model);
-	
+
 	ImGuiContainers::init_window_content(window.get_glfwWindow());
 	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
 	vec3 viewDir(0.f, 0.f, -1.f);
 	float x = 0.f, y = 0.f, z = 0.f;
 	bool fixed = false;
+
+	glfwSetScrollCallback(window.get_glfwWindow(), mouse_scroll_callback);
 
 	ImGuiContainers imguis;
 
@@ -94,9 +116,7 @@ int main(void)
 		}
 		shader.upload_vw_matrix(view);
 
-
 		imguis.render_layers();
-
 		ImGuiContainers::render();
 
 		glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
