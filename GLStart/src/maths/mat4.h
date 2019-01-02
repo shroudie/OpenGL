@@ -20,11 +20,9 @@ struct mat4
 		elements[15] = diagonal;
 	}
 
-	mat4& diagonal_scale(float s) {
+	mat4& scale_2d(float s) {
 		elements[0] /= s;
 		elements[5] /= s;
-		elements[10] /= s;
-		elements[15] /= s;
 		return *this;
 	}
 
@@ -80,7 +78,6 @@ struct mat4
 
 	static mat4 orthographic_matrix(float l, float r, float b, float t, float n, float f) {
 		mat4 ortho;
-		ortho.elements[15] = 1.f;
 		ortho.elements[0] = 2.f / (r - l);
 		ortho.elements[5] = 2.f / (t - b);
 		ortho.elements[10] = 2.f / (n - f);
@@ -88,6 +85,7 @@ struct mat4
 		ortho.elements[3] = (l + r) / (l - r);
 		ortho.elements[7] = (b + t) / (b - t);
 		ortho.elements[11] = (n + f) / (n - f);
+		ortho.elements[15] = 1.f;
 		return ortho;
 	}
 

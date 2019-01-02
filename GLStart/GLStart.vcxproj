@@ -20,27 +20,25 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Dependencies\glad\include\glad\glad.c" />
+    <ClCompile Include="src\application.cpp" />
     <ClCompile Include="src\layers\curves\bezier.cpp" />
     <ClCompile Include="src\layers\curves\curve.cpp" />
     <ClCompile Include="src\graphics\camera.cpp" />
-    <ClCompile Include="src\graphics\imGuiContainer.cpp" />
     <ClCompile Include="src\graphics\shader.cpp" />
-    <ClCompile Include="src\graphics\window.cpp" />
     <ClCompile Include="src\imgui\imgui.cpp" />
-    <ClCompile Include="src\imgui\imgui_demo.cpp" />
     <ClCompile Include="src\imgui\imgui_draw.cpp" />
     <ClCompile Include="src\imgui\imgui_impl_glfw.cpp" />
     <ClCompile Include="src\imgui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="src\imgui\imgui_widgets.cpp" />
-    <ClCompile Include="src\layers\layer.cpp" />
+    <ClCompile Include="src\layers\shape.cpp" />
     <ClCompile Include="src\layers\solid.cpp" />
     <ClCompile Include="src\Main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\application.h" />
     <ClInclude Include="src\layers\curves\bezier.h" />
     <ClInclude Include="src\layers\curves\curve.h" />
     <ClInclude Include="src\graphics\camera.h" />
-    <ClInclude Include="src\graphics\imGuiContainer.h" />
     <ClInclude Include="src\graphics\shader.h" />
     <ClInclude Include="src\imgui\imconfig.h" />
     <ClInclude Include="src\imgui\imgui.h" />
@@ -51,9 +49,9 @@
     <ClInclude Include="src\imgui\imstb_textedit.h" />
     <ClInclude Include="src\imgui\imstb_truetype.h" />
     <ClInclude Include="src\layers\layer.h" />
+    <ClInclude Include="src\layers\shape.h" />
     <ClInclude Include="src\layers\solid.h" />
     <ClInclude Include="src\maths\mat4.h" />
-    <ClInclude Include="src\graphics\window.h" />
     <ClInclude Include="src\maths\maths.h" />
     <ClInclude Include="src\maths\vec2.h" />
     <ClInclude Include="src\maths\vec3.h" />

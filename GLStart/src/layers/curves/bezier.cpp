@@ -7,6 +7,12 @@ Bezier::Bezier() : Curve()
 
 Bezier::Bezier(const Point &i0, const Point &i1, const Point &i2, const Point &i3) : Curve(i0, i1, i2, i3)
 {
+	vertexes.push_back(i1.px);
+	vertexes.push_back(i1.py);
+	vertexes.push_back(-5.f);
+	colors.push_back(1.f);
+	colors.push_back(0.f);
+	colors.push_back(0.f);
 	for (unsigned int i = 0; i <= division; ++i) {
 		float t = (float)i / division;
 		Point p = lerp(i0, i1, i2, i3, t);
@@ -16,9 +22,6 @@ Bezier::Bezier(const Point &i0, const Point &i1, const Point &i2, const Point &i
 		colors.push_back(1.f);
 		colors.push_back(0.f);
 		colors.push_back(0.f);
-	}
-	for (unsigned int i = 0; i < vertexes.size(); i+=3) {
-		std::cout << vertexes[i] << " " << vertexes[i+1] << " " << vertexes[i+2] << std::endl;
 	}
 }
 

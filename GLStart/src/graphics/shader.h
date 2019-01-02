@@ -9,19 +9,15 @@
 class Shader
 {
 public:
-	Shader() {}
-	Shader(const char *, const char *);
-	GLuint load_shaders();
-	int init_matrices(const char*, const char*, const char*);
-	void upload_pr_matrix(const mat4&);
-	void upload_vw_matrix(const mat4&);
-	void upload_ml_matrix(const mat4&);
+	GLint pr_matrix_id, vw_matrix_id, ml_matrix_id;
 
+	Shader() {}
+	GLuint load_shaders(const char *, const char *);
+	void init_matrix(GLint *, const char*);
+	void upload_matrix(const mat4&, GLint);
 	~Shader();
 
 private:
 	GLuint shader_id;
-	GLint pr_matrix_id, vw_matrix_id, ml_matrix_id;
-	const char *vert_path, *frag_path;
 };
 

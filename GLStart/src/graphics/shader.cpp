@@ -1,15 +1,8 @@
 #include "shader.h"
 
-Shader::Shader(const char * vertex_fp, const char * fragment_fp):
-	vert_path(vertex_fp), frag_path(fragment_fp)
+GLuint Shader::load_shaders(const char * vertex_fp, const char * fragment_fp)
 {
-	gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-	//shader = load_shaders();
-}
-
-GLuint Shader::load_shaders()
-{
-	string vs = read_file(vert_path);
+	string vs = read_file(vertex_fp);
 	char *vert_shader_text = new char[vs.size()];
 	strcpy(vert_shader_text, vs.c_str());
 
@@ -31,7 +24,7 @@ GLuint Shader::load_shaders()
 		printf("%s\n", &vertex_shader_errors[0]);
 	}
 
-	string fs = read_file(frag_path);
+	string fs = read_file(fragment_fp);
 	char *frag_shader_text = new char[fs.size()];
 	strcpy(frag_shader_text, fs.c_str());
 
@@ -59,24 +52,13 @@ GLuint Shader::load_shaders()
 	return shader_id;
 }
 
-int Shader::init_matrices(const char * pr, const char * vw, const char * ml)
+void Shader::init_matrix(GLint *mpos, const char* mname)
 {
-	pr_matrix_id = glGetUniformLocation(shader_id, pr);
-	vw_matrix_id = glGetUniformLocation(shader_id, vw);
-	ml_matrix_id = glGetUniformLocation(shader_id, ml);
-	return 0;
+	*mpos = glGetUniformLocation(shader_id, mname);
 }
 
-void Shader::upload_pr_matrix(const mat4& m) {
-	glUniformMatrix4fv(pr_matrix_id, 1, GL_FALSE, &m.elements[0]);
-}
-
-void Shader::upload_vw_matrix(const mat4& m) {
-	glUniformMatrix4fv(vw_matrix_id, 1, GL_FALSE, &m.elements[0]);
-}
-
-void Shader::upload_ml_matrix(const mat4& m) {
-	glUniformMatrix4fv(ml_matrix_id, 1, GL_FALSE, &m.elements[0]);
+void Shader::upload_matrix(const mat4& m, GLint id) {
+	glUniformMatrix4fv(id, 1, GL_FALSE, &m.elements[0]);
 }
 
 Shader::~Shader()

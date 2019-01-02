@@ -1,49 +1,38 @@
 #pragma once
 
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
+
 #include "../imgui/imgui.h"
 #include "../imgui/imgui_impl_glfw.h"
 #include "../imgui/imgui_impl_opengl3.h"
 
 #include "../layers/solid.h"
+#include "../layers/shape.h"
 #include "../layers/curves/bezier.h"
+
+#include <deque>
 
 #define GLSL_VERSION "#version 130"
 
 class ImGuiContainers {
 public:
-	ImGuiContainers() {}
-	~ImGuiContainers();
-
 	static void new_frame() {
-		ImGui_ImplOpenGL3_NewFrame();
-		ImGui_ImplGlfw_NewFrame();
-		ImGui::NewFrame();
 	}
 	   
-	static void init_window_content(GLFWwindow *win) {
-		ImGui::CreateContext();
-		ImGuiIO& io = ImGui::GetIO(); (void)io;
 
-		ImGui_ImplGlfw_InitForOpenGL(win, true);
-		ImGui_ImplOpenGL3_Init(GLSL_VERSION);
-		ImGui::StyleColorsDark();
-	}
 
-	static void render() {
-		ImGui::Render();
-		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-	}
+
 
 	static void destroy() {
+		for (unsigned int i = 0; i < layers.size(); i++) {
+			delete layers[i];
+		}	
 		ImGui_ImplOpenGL3_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
 	}
 
 	//create window function
-	void setup_menu() {
+	static void setup_menu() {
 		if (ImGui::BeginMainMenuBar())
 		{
 			if (ImGui::BeginMenu("File"))
@@ -60,46 +49,24 @@ public:
 			{
 				{
 					if (ImGui::MenuItem("solid")) {
-						cout << "solids" << endl;
-						vector<GLfloat> vertex = {
-							-1.f, -1.f, -5.f,
-							1.f, -1.f, -5.f,
-							0.f, 1.f, -5.f
-						};
-						float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-						cout << r << endl;
-						vector<GLfloat> color;
-						if (solids.size() % 2 == 0) {
-							color = {
-								r, 0.f, 0.f,
-								r, 0.f, 0.f,
-								r, 0.f, 0.f
-							};
+						Solid *solid = new Solid();
+						layers.push_back(solid);
+					}
+					if (ImGui::BeginMenu("Shape")) {
+						if (ImGui::MenuItem("triangle")) {
+							Shape *triangle = new Shape(3);
+							layers.push_back(triangle);
 						}
-						else {
-							color = {
-								0.f, 0.f, r,
-								0.f, 0.f, r,
-								0.f, 0.f, r
-							};
-						}
-						Solid *s = new Solid(vertex, color);
-						char name[100];
-						strcpy(name, "layers");
-						strcat(name, to_string(counter).c_str());
-						s->set_layer_name(name);
-						solids.push_back(s);
-						storage.push_back(counter);
-						cout << storage[counter] << endl;
-						counter += 1;
-						cout << "cout here: " << r << endl;
+						ImGui::EndMenu();
 					}
 					if (ImGui::BeginMenu("curves")) {
+						/*
 						if (ImGui::MenuItem("Bezier Curve")) {
 							Point p0(-2.f, -2.f), p1(-2.f, 2.f), p2(2.f, 2.f), p3(2.f, -2.f);
 							Bezier *bezier_curve = new Bezier(p0, p1, p2, p3);
 							curves.push_back(bezier_curve);
 						}
+						*/
 						ImGui::EndMenu();
 					}
 				}
@@ -111,8 +78,8 @@ public:
 		ImGui::Begin("Layers");
 		{
 			int move_from = -1, move_to = -1;
-			for (unsigned int i = 0; i < solids.size(); i++) {
-				if (ImGui::TreeNode(solids[i]->get_layer_name())) {
+			for (unsigned int i = 0; i < layers.size(); i++) {
+				if (ImGui::TreeNode(layers[i]->get_layer_name())) {
 					ImGui::TreePop();
 				}
 				if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
@@ -132,31 +99,29 @@ public:
 				}
 			}
 			if (move_from != -1 && move_to != -1) {
-				vector<Solid*>::iterator it = solids.begin() + move_from;
-				Solid *cur = *it;
-				solids.erase(it);
-				it = solids.begin() + move_to;
-				solids.insert(it, cur);
+				deque<Layer*>::iterator it = layers.begin() + move_from;
+				Layer *cur = *it;
+				layers.erase(it);
+				it = layers.begin() + move_to;
+				layers.insert(it, cur);
 			}
 		}
 		ImGui::End();
 	}
 
-	void render_layers() {
-		for (vector<Solid*>::reverse_iterator it = solids.rbegin(); it != solids.rend(); it++) {
+	static void render_layers() {
+		for (deque<Layer*>::reverse_iterator it = layers.rbegin(); it != layers.rend(); it++) {
 			(*it)->draw();
-		}
-		for (vector<Curve*>::reverse_iterator it = curves.rbegin(); it != curves.rend(); it++) {
-			(*it)->draw_curve();
 		}
 	}
 
-private:
-	vector<int> storage;
-	vector<Solid*> solids;
-	vector<Curve*> curves;
+	void set_clicked_object() {
+		for (deque<Layer*>::iterator it = layers.begin(); it != layers.end(); it++) {
+		}
+	}
 
-	int counter = 0;
+//private:
+	static deque<Layer*> layers;
 
 	static void setup_menu_file() {
 		ImGui::MenuItem("file menu", NULL, false, false);
@@ -182,9 +147,5 @@ private:
 		if (ImGui::MenuItem("Cut", "CTRL+X")) {}
 		if (ImGui::MenuItem("Copy", "CTRL+C")) {}
 		if (ImGui::MenuItem("Paste", "CTRL+V")) {}
-	}
-
-	static void setup_menu_layer() {
-
 	}
 };
