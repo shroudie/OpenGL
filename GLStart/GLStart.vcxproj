@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="..\Dependencies\glad\include\glad\glad.c" />
     <ClCompile Include="src\application.cpp" />
+    <ClCompile Include="src\imgui\imgui_demo.cpp" />
     <ClCompile Include="src\layers\curves\bezier.cpp" />
     <ClCompile Include="src\layers\curves\curve.cpp" />
     <ClCompile Include="src\graphics\camera.cpp" />
@@ -30,12 +31,15 @@
     <ClCompile Include="src\imgui\imgui_impl_glfw.cpp" />
     <ClCompile Include="src\imgui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="src\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="src\layers\object.cpp" />
+    <ClCompile Include="src\layers\object.h" />
     <ClCompile Include="src\layers\shape.cpp" />
     <ClCompile Include="src\layers\solid.cpp" />
     <ClCompile Include="src\Main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\application.h" />
+    <ClInclude Include="src\graphics\renderer.h" />
     <ClInclude Include="src\layers\curves\bezier.h" />
     <ClInclude Include="src\layers\curves\curve.h" />
     <ClInclude Include="src\graphics\camera.h" />
@@ -55,6 +59,7 @@
     <ClInclude Include="src\maths\maths.h" />
     <ClInclude Include="src\maths\vec2.h" />
     <ClInclude Include="src\maths\vec3.h" />
+    <ClInclude Include="src\maths\vec4.h" />
     <ClInclude Include="src\utils.h" />
   </ItemGroup>
   <ItemGroup>

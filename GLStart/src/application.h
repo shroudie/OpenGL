@@ -11,6 +11,7 @@
 #include "graphics/window.h"
 #include "layers/solid.h"
 #include "layers/shape.h"
+//#include "layers/object.h"
 #include "layers/curves/bezier.h"
 
 #include <deque>
@@ -24,6 +25,9 @@ public:
 	static Shader shader; 
 
 	static deque<Layer*> layers;
+	static deque<Layer*>::iterator selected;
+
+	static bool enable_3d;
 
 	static bool should_close() {
 		return glfwWindowShouldClose(window);
@@ -51,7 +55,8 @@ public:
 		glfwMakeContextCurrent(window);
 
 		glfwSetKeyCallback(window, exit_key_callback);
-		glfwSetMouseButtonCallback(window, mouse_button_callback);
+		//glfwSetMouseButtonCallback(window, mouse_button_callback); //TODO: 3d
+		//glfwSetCursorPosCallback(window, cursor_position_callback);
 	}
 
 	static void init_shader_components() {
@@ -59,6 +64,7 @@ public:
 		shader_id = shader.load_shaders("src/shaders/shader.vert", "src/shaders/shader.frag");
 		shader.init_matrix(&shader.pr_matrix_id, "pr_matrix");
 		shader.init_matrix(&shader.ml_matrix_id, "ml_matrix");
+		shader.init_matrix(&shader.vw_matrix_id, "vw_matrix");
 		glUseProgram(shader_id);
 	}
 
@@ -68,9 +74,16 @@ public:
 		float ratio = width / (float)height;
 		glViewport(0, 0, width, height);
 
-		mat4 ml = mat4::identity_matrix();
-		mat4 pr = mat4::orthographic_matrix(-ratio, ratio, -1.f, 1.f, 1.f, -1.f);
+		mat4 ml = mat4::identity_matrix(), pr, vw;
+		if (enable_3d) {
+			pr = mat4::perspective_matrix(degreeToRadius(45), ratio, .1f, 200.f);
+			vw = mat4::look_at(vec3(0, 0, 0), vec3(0, 0, -1), vec3(0, 1, 0));
+		}
+		else {
+			pr = mat4::orthographic_matrix(-ratio, ratio, -1.f, 1.f, 1.f, -1.f);
+		}
 		shader.upload_matrix(ml, shader.ml_matrix_id);
+		shader.upload_matrix(vw, shader.vw_matrix_id);
 		shader.upload_matrix(pr, shader.pr_matrix_id);
 	}
 
@@ -92,6 +105,7 @@ public:
 		ImGui::NewFrame();
 
 		imgui_setup_menu();
+		//ImGui::ShowDemoWindow();
 
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -200,25 +214,45 @@ private:
 			glfwSetWindowShouldClose(window, GLFW_TRUE);
 	}
 
+	static double cursor_x, cursor_y;
+	static bool registered;
 	static void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
-		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
-			double xpos, ypos;
-			glfwGetCursorPos(window, &xpos, &ypos);
-			xpos -= 1280;
-			xpos /= 1280;
-			ypos -= 720;
-			ypos /= 720;
-			// convert to window view port locations
-			deque<Layer*>::iterator it = layers.begin();
-			if (it != layers.end()) {
-				if ((*it)->is_inside_object((float)xpos, (float)ypos)) {
-					cout << "inside the object" << endl;
-				}
-				else {
-					cout << "outside the object" << endl;
+		if (button == GLFW_MOUSE_BUTTON_LEFT) {
+			if (action == GLFW_PRESS) {
+				double xpos, ypos;
+				glfwGetCursorPos(window, &xpos, &ypos);
+				for (selected = layers.begin(); selected != layers.end(); selected++) {
+					if ((*selected)->is_inside_object((float)xpos / 640.f - 1.f, 1.f - (float)ypos / 360.f)) {
+						cursor_x = xpos;
+						cursor_y = ypos;
+						registered = true;
+						break;
+					}
 				}
 			}
+			else {
+				cout << "release button" << endl;
+				registered = false;
+			}
 		}
+	}
+
+
+	static void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
+	{
+		if (registered) {
+			float offsetx = (float)(xpos - cursor_x), offsety = (float)(cursor_y - ypos);
+			offsetx /= 640.f;
+			offsety /= 360.f;
+			(*selected)->move(offsetx, offsety);
+			cursor_x = xpos;
+			cursor_y = ypos;
+		}
+		//if (selected != layers.end()) {
+		//	cout << "should move" << endl;
+		//	float offsetx = (float)(xpos - cursor_x), offsety = (float)(ypos - cursor_y);
+		//	(*selected)->move(offsetx, offsety);
+		//}
 	}
 
 	/*
@@ -262,7 +296,10 @@ private:
 	static void imgui_setup_menu_file() {
 		ImGui::MenuItem("file menu", NULL, false, false);
 		if (ImGui::MenuItem("New")) {}
-		if (ImGui::MenuItem("Open", "Ctrl+O")) {}
+		if (ImGui::MenuItem("Open", "Ctrl+O")) {
+			//Object *o = new Object("src/objects/cow.obj");
+		//	delete o;
+		}
 		if (ImGui::BeginMenu("submenu"))
 		{
 			ImGui::MenuItem("sub1");
@@ -274,5 +311,9 @@ private:
 			ImGui::EndMenu();
 		}
 		if (ImGui::MenuItem("Exit", "Alt+F4")) {}
+	}
+
+	static void imgui_setup_inlayer_menu() {
+
 	}
 };

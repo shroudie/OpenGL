@@ -2,6 +2,7 @@
 #include <cmath>
 #include <ostream>
 #include <iostream>
+#include "vec4.h"
 using namespace std;
 
 struct mat4
@@ -136,6 +137,15 @@ struct mat4
 
 	friend mat4 operator*(mat4 l, const mat4& r) {
 		return l.mult(r);
+	}
+
+	friend vec4 operator*(const mat4& m4, const vec4& r) {
+		const float *l = m4.elements;
+		float r0 = l[0] * r.x + l[1] * r.y + l[2] * r.z + l[3] * r.w,
+			r1 = l[4] * r.x + l[5] * r.y + l[6] * r.z + l[7] * r.w,
+			r2 = l[8] * r.x + l[9] * r.y + l[10] * r.z + l[11] * r.w,
+			r3 = l[12] * r.x + l[13] * r.y + l[14] * r.z + l[15] * r.w;
+		return vec4(r0, r1, r2, r3);
 	}
 
 	friend std::ostream& operator<<(std::ostream& s, mat4& m) {
