@@ -10,9 +10,14 @@ Shape::Shape(int n)
 	else if (n == 3) {
 		this->set_layer_name("triangle");
 		buffers.vertices = {
-			-0.3f, -0.3f, -5.f, 1.f, 0.f, 0.f,
-			0.3f, -0.3f, -5.f, 0.f, 1.f, 0.f,
-			0.f,  0.6f, -5.f, 0.f, 0.f, 1.f
+			-0.3f, -0.3f, -5.f,
+			0.3f, -0.3f, -5.f,
+			0.f,  0.6f, -5.f,
+		};
+		buffers.normals = {
+			0.f, 1.f, 1.f,
+			1.f, 0.f, 1.f,
+			1.f, 1.f, 0.f,
 		};
 		buffers.indices = {
 			0, 1, 2

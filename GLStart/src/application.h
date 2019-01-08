@@ -8,15 +8,16 @@
 #include "imgui/imgui_impl_opengl3.h"
 
 #include "graphics/shader.h"
-#include "graphics/window.h"
+#include "graphics/renderer.h"
 #include "layers/solid.h"
 #include "layers/shape.h"
-//#include "layers/object.h"
+#include "layers/customObject.h"
 #include "layers/curves/bezier.h"
 
 #include <deque>
 
 #define GLSL_VERSION "#version 130"
+
 
 class Application {
 public:
@@ -24,10 +25,10 @@ public:
 	static GLFWwindow *window;
 	static Shader shader; 
 
-	static deque<Layer*> layers;
-	static deque<Layer*>::iterator selected;
+	static Renderer renderer;
 
 	static bool enable_3d;
+	static light_info light;
 
 	static bool should_close() {
 		return glfwWindowShouldClose(window);
@@ -59,12 +60,19 @@ public:
 		//glfwSetCursorPosCallback(window, cursor_position_callback);
 	}
 
+	static GLint un_matrix_id;
+
 	static void init_shader_components() {
 		gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 		shader_id = shader.load_shaders("src/shaders/shader.vert", "src/shaders/shader.frag");
 		shader.init_matrix(&shader.pr_matrix_id, "pr_matrix");
-		shader.init_matrix(&shader.ml_matrix_id, "ml_matrix");
+		//shader.init_matrix(&shader.ml_matrix_id, "ml_matrix");
 		shader.init_matrix(&shader.vw_matrix_id, "vw_matrix");
+		shader.init_matrix(&un_matrix_id, "uNMatrix");
+		cout << "un matrix id" << un_matrix_id << endl;
+		if (enable_3d) {
+			shader.init_light_locations();
+		}
 		glUseProgram(shader_id);
 	}
 
@@ -74,17 +82,23 @@ public:
 		float ratio = width / (float)height;
 		glViewport(0, 0, width, height);
 
-		mat4 ml = mat4::identity_matrix(), pr, vw;
+		mat4 pr, vw;
 		if (enable_3d) {
-			pr = mat4::perspective_matrix(degreeToRadius(45), ratio, .1f, 200.f);
-			vw = mat4::look_at(vec3(0, 0, 0), vec3(0, 0, -1), vec3(0, 1, 0));
+			pr = mat4::perspective_matrix(degreeToRadius(45), ratio, .1f, 500.f);
+			vw = mat4::look_at(vec3(0, 0, 2), vec3(0, 0, 1), vec3(0, 1, 0));
 		}
 		else {
 			pr = mat4::orthographic_matrix(-ratio, ratio, -1.f, 1.f, 1.f, -1.f);
 		}
-		shader.upload_matrix(ml, shader.ml_matrix_id);
+		mat3 un = mat3::from_mat4(vw);
+		un = un.transpose();
+		un = un.invert();
+
+		//shader.upload_matrix(ml, shader.ml_matrix_id);
 		shader.upload_matrix(vw, shader.vw_matrix_id);
+		glUniformMatrix3fv(un_matrix_id, 1, GL_FALSE, &un.elements[0]);
 		shader.upload_matrix(pr, shader.pr_matrix_id);
+		shader.upload_light_components();
 	}
 
 	/*
@@ -112,9 +126,7 @@ public:
 	}
 
 	static void render_layers() {
-		for (deque<Layer*>::reverse_iterator it = layers.rbegin(); it != layers.rend(); it++) {
-			(*it)->draw();
-		}
+		renderer.flush();
 	}
 	static void destroy_window() {
 		imgui_destroy();
@@ -141,12 +153,12 @@ private:
 				{
 					if (ImGui::MenuItem("solid")) {
 						Solid *solid = new Solid();
-						layers.push_back(solid);
+						renderer.submit(solid);
 					}
 					if (ImGui::BeginMenu("Shape")) {
 						if (ImGui::MenuItem("triangle")) {
 							Shape *triangle = new Shape(3);
-							layers.push_back(triangle);
+							renderer.submit(triangle);
 						}
 						ImGui::EndMenu();
 					}
@@ -168,9 +180,21 @@ private:
 
 		ImGui::Begin("Layers");
 		{
+			if (ImGui::TreeNode("camera")) {
+				static float p1 = 0.f, p2 = 0.f, p3 = 0.f;
+				ImGui::PushItemWidth(50); ImGui::DragFloat("posx", &p1, 0.05f); ImGui::SameLine();
+				ImGui::PushItemWidth(50); ImGui::DragFloat("posy", &p2, 0.05f); ImGui::SameLine();
+				ImGui::PushItemWidth(50); ImGui::DragFloat("posz", &p3, 0.05f);
+				ImGui::TreePop();
+			}
 			int move_from = -1, move_to = -1;
-			for (unsigned int i = 0; i < layers.size(); i++) {
-				if (ImGui::TreeNode(layers[i]->get_layer_name())) {
+			for (unsigned int i = 0; i < renderer.count(); i++) {
+				if (ImGui::TreeNode(renderer.layer_name(i))) {
+					if (ImGui::TreeNode("position")) {
+						static float f1 = 1.00f, f2 = 0.0067f;
+						ImGui::DragFloat("drag float", &f1, 0.005f);
+						ImGui::TreePop();
+					}
 					ImGui::TreePop();
 				}
 				if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
@@ -190,11 +214,7 @@ private:
 				}
 			}
 			if (move_from != -1 && move_to != -1) {
-				deque<Layer*>::iterator it = layers.begin() + move_from;
-				Layer *cur = *it;
-				layers.erase(it);
-				it = layers.begin() + move_to;
-				layers.insert(it, cur);
+				renderer.move(move_from, move_to);
 			}
 		}
 		ImGui::End();
@@ -217,7 +237,7 @@ private:
 	static double cursor_x, cursor_y;
 	static bool registered;
 	static void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
-		if (button == GLFW_MOUSE_BUTTON_LEFT) {
+		/*if (button == GLFW_MOUSE_BUTTON_LEFT) {
 			if (action == GLFW_PRESS) {
 				double xpos, ypos;
 				glfwGetCursorPos(window, &xpos, &ypos);
@@ -234,20 +254,20 @@ private:
 				cout << "release button" << endl;
 				registered = false;
 			}
-		}
+		}*/
 	}
 
 
 	static void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
 	{
-		if (registered) {
+		/*if (registered) {
 			float offsetx = (float)(xpos - cursor_x), offsety = (float)(cursor_y - ypos);
 			offsetx /= 640.f;
 			offsety /= 360.f;
 			(*selected)->move(offsetx, offsety);
 			cursor_x = xpos;
 			cursor_y = ypos;
-		}
+		}*/
 		//if (selected != layers.end()) {
 		//	cout << "should move" << endl;
 		//	float offsetx = (float)(xpos - cursor_x), offsety = (float)(ypos - cursor_y);
@@ -259,9 +279,6 @@ private:
 		IMGUI COMPONENTS
 	*/
 	static void imgui_destroy() {
-		for (unsigned int i = 0; i < layers.size(); i++) {
-			delete layers[i];
-		}
 		ImGui_ImplOpenGL3_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
@@ -296,10 +313,10 @@ private:
 	static void imgui_setup_menu_file() {
 		ImGui::MenuItem("file menu", NULL, false, false);
 		if (ImGui::MenuItem("New")) {}
-		if (ImGui::MenuItem("Open", "Ctrl+O")) {
-			//Object *o = new Object("src/objects/cow.obj");
-		//	delete o;
+		if (ImGui::MenuItem("Import", "Ctrl+I")) {
+			import_custom_object();
 		}
+		ImGui::Separator();
 		if (ImGui::BeginMenu("submenu"))
 		{
 			ImGui::MenuItem("sub1");
@@ -315,5 +332,10 @@ private:
 
 	static void imgui_setup_inlayer_menu() {
 
+	}
+
+	static void import_custom_object() {
+		customObject *o = new customObject("src/objects/cow.obj");
+		renderer.submit(o);
 	}
 };

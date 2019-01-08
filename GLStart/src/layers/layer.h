@@ -4,20 +4,11 @@
 #include <GLFW/glfw3.h>
 #include "../maths/maths.h"
 
-struct DataBuffer {
-	GLuint vbo;
-	vector<GLfloat> datas;
-};
-
-struct IndexBuffer {
-	GLuint ibo;
-	vector<GLushort> indices;
-};
-
 struct VertexArrayObject {
-	GLuint vbo[2];
+	GLuint vbo[3];
 	vector<GLfloat> vertices;
-	vector<GLushort> indices;
+	vector<GLfloat> normals;
+	vector<GLuint> indices;
 };
 
 class Layer {
@@ -51,27 +42,28 @@ public:
 	}
 
 	void load_buffers() {
-		glGenBuffers(2, buffers.vbo);
+		glGenBuffers(3, buffers.vbo);
 		glBindBuffer(GL_ARRAY_BUFFER, buffers.vbo[0]);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * buffers.vertices.size(), &buffers.vertices[0], GL_STATIC_DRAW);
-		//glBindBuffer(GL_ARRAY_BUFFER, 0);
-
 		glEnableVertexAttribArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, buffers.vbo[1]);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * buffers.normals.size(), &buffers.normals[0], GL_STATIC_DRAW);
 		glEnableVertexAttribArray(1);
+		//glBindBuffer(GL_ARRAY_BUFFER, 0); //unbind
 
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers.vbo[1]);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, buffers.indices.size() * sizeof(GLushort), &buffers.indices[0], GL_STATIC_DRAW);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers.vbo[2]);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, buffers.indices.size() * sizeof(GLuint), &buffers.indices[0], GL_STATIC_DRAW);
 	}
 
 	//TODO: is it necessary to unbind on each draw?
 	void draw() {
 		glBindBuffer(GL_ARRAY_BUFFER, buffers.vbo[0]);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), nullptr);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers.vbo[1]);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)(sizeof(GLfloat) * 3));
-
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 		glBindBuffer(GL_ARRAY_BUFFER, buffers.vbo[1]);
-		glDrawElements(GL_TRIANGLES, buffers.indices.size(), GL_UNSIGNED_SHORT, 0);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers.vbo[2]);
+		glDrawElements(GL_TRIANGLES, buffers.indices.size(), GL_UNSIGNED_INT, 0);
 	}
 
 	virtual bool is_inside_object(float, float) = 0;

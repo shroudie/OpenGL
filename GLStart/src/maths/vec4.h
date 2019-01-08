@@ -2,20 +2,17 @@
 #include <ostream>
 
 struct vec4 {
-	float x, y, z, w;
+	float elements[4];
 
 	vec4() {
-		this->x = 0.0f;
-		this->y = 0.0f;
-		this->z = 0.0f;
-		this->w = 0.0f;
+		memset(elements, 0, 4 * sizeof(float));
 	}
 
 	vec4(const float &x, const float &y, const float &z, const float &w) {
-		this->x = x;
-		this->y = y;
-		this->z = z;
-		this->w = w;
+		this->elements[0] = x;
+		this->elements[1] = y;
+		this->elements[2] = z;
+		this->elements[3] = w;
 	}
 
 	friend std::ostream& operator<<(std::ostream& s, const vec4& v) {

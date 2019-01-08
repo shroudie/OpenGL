@@ -2,7 +2,7 @@
 #include <ostream>
 
 struct vec3 {
-	float x, y, z;
+	float elements[3];
 	
 	vec3() {
 		this->x = 0.0f;
@@ -18,11 +18,14 @@ struct vec3 {
 
 	static vec3 normalize(const vec3& v) {
 		float magnitude = sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
-		return vec3(v.x / magnitude, v.y / magnitude, v.z / magnitude);
+		if (magnitude > 0.f) magnitude = 1 / magnitude;
+		return vec3(v.x * magnitude, v.y * magnitude, v.z * magnitude);
 	}
 
 	static vec3 cross_product(const vec3& l, const vec3& r) {
-		return vec3(l.y*r.z - l.z*r.y, l.z*r.x - l.x*r.z, l.x*r.y - l.y*r.x);
+		float ax = l.x, ay = l.y, az = l.z;
+		float bx = r.x, by = r.y, bz = r.z;
+		return vec3(ay * bz - az * by, az * bx - ax * bz, ax * by - ay * bx);
 	}
 
 	friend float operator*(vec3 left, const vec3& other) {

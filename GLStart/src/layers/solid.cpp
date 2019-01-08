@@ -4,10 +4,16 @@ Solid::Solid() : Layer()
 {
 	this->set_layer_name("solid");
 	buffers.vertices = {
-		-0.8f, -0.8f, -5.f, 1.f, 1.f, 1.f,
-		0.8f, -0.8f, -5.f, 1.f, 0.f, 0.f,
-		0.8f,  0.8f, -5.f, 0.f, 1.f, 0.f,
-		-0.8f, 0.8f, -5.f, 0.f, 0.f, 1.f,
+		-0.8f, -0.8f, -5.f,
+		0.8f, -0.8f, -5.f,
+		0.8f,  0.8f, -5.f,
+		-0.8f, 0.8f, -5.f
+	};
+	buffers.normals = {
+		1.f, 1.f, 1.f,
+		1.f, 1.f, 1.f,
+		1.f, 1.f, 1.f,
+		1.f, 1.f, 1.f
 	};
 	buffers.indices = {
 		0, 1, 2, 

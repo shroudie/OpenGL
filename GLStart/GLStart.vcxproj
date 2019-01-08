@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="..\Dependencies\glad\include\glad\glad.c" />
     <ClCompile Include="src\application.cpp" />
+    <ClCompile Include="src\graphics\renderer.cpp" />
     <ClCompile Include="src\imgui\imgui_demo.cpp" />
     <ClCompile Include="src\layers\curves\bezier.cpp" />
     <ClCompile Include="src\layers\curves\curve.cpp" />
@@ -31,8 +32,7 @@
     <ClCompile Include="src\imgui\imgui_impl_glfw.cpp" />
     <ClCompile Include="src\imgui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="src\imgui\imgui_widgets.cpp" />
-    <ClCompile Include="src\layers\object.cpp" />
-    <ClCompile Include="src\layers\object.h" />
+    <ClCompile Include="src\layers\customObject.cpp" />
     <ClCompile Include="src\layers\shape.cpp" />
     <ClCompile Include="src\layers\solid.cpp" />
     <ClCompile Include="src\Main.cpp" />
@@ -52,9 +52,11 @@
     <ClInclude Include="src\imgui\imstb_rectpack.h" />
     <ClInclude Include="src\imgui\imstb_textedit.h" />
     <ClInclude Include="src\imgui\imstb_truetype.h" />
+    <ClInclude Include="src\layers\customObject.h" />
     <ClInclude Include="src\layers\layer.h" />
     <ClInclude Include="src\layers\shape.h" />
     <ClInclude Include="src\layers\solid.h" />
+    <ClInclude Include="src\maths\mat3.h" />
     <ClInclude Include="src\maths\mat4.h" />
     <ClInclude Include="src\maths\maths.h" />
     <ClInclude Include="src\maths\vec2.h" />
