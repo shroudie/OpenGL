@@ -102,11 +102,15 @@ struct mat4
 		return out;
 	}
 
+	static mat4 translation_matrix(const vec3& v) {
+		return translation_matrix(v.elements[0], v.elements[1], v.elements[2]);
+	}
+
 	static mat4 translation_matrix(float x, float y, float z) {
 		mat4 out(1.f);
-		out.elements[3] = x;
-		out.elements[7] = y;
-		out.elements[11] = z;
+		out.elements[12] = x;
+		out.elements[13] = y;
+		out.elements[14] = z;
 		return out;
 	}
 	
@@ -116,17 +120,17 @@ struct mat4
 		vec3 u = vec3::cross_product(r, v);
 
 		mat4 out;
-		out.elements[0] = r.x;
-		out.elements[1] = u.x;
-		out.elements[2] = -v.x;
+		out.elements[0] = r[0];
+		out.elements[1] = u[0];
+		out.elements[2] = -v[0];
 
-		out.elements[4] = r.y;
-		out.elements[5] = u.y;
-		out.elements[6] = -v.y;
+		out.elements[4] = r[1];
+		out.elements[5] = u[1];
+		out.elements[6] = -v[1];
 
-		out.elements[8] = r.z;
-		out.elements[9] = u.z;
-		out.elements[10] = -v.z;
+		out.elements[8] = r[2];
+		out.elements[9] = u[2];
+		out.elements[10] = -v[2];
 
 		out.elements[12] = r * eye;
 		out.elements[13] = u * eye;
@@ -135,16 +139,24 @@ struct mat4
 		return out;
 	}
 
+	const float &operator[](int index) const {
+		return elements[index];
+	}
+
+	float &operator[](int index) {
+		return elements[index];
+	}
+
 	friend mat4 operator*(mat4 l, const mat4& r) {
 		return l.mult(r);
 	}
 
 	friend vec4 operator*(const mat4& m4, const vec4& r) {
 		const float *l = m4.elements;
-		float r0 = l[0] * r.x + l[1] * r.y + l[2] * r.z + l[3] * r.w,
-			r1 = l[4] * r.x + l[5] * r.y + l[6] * r.z + l[7] * r.w,
-			r2 = l[8] * r.x + l[9] * r.y + l[10] * r.z + l[11] * r.w,
-			r3 = l[12] * r.x + l[13] * r.y + l[14] * r.z + l[15] * r.w;
+		float r0 = l[0] * r[0] + l[1] * r[1] + l[2] * r[2] + l[3] * r[3],
+			r1 = l[4] * r[0] + l[5] * r[1] + l[6] * r[2] + l[7] * r[3],
+			r2 = l[8] * r[0] + l[9] * r[1] + l[10] * r[2] + l[11] * r[3],
+			r3 = l[12] * r[0] + l[13] * r[1] + l[14] * r[2] + l[15] * r[3];
 		return vec4(r0, r1, r2, r3);
 	}
 

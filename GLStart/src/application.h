@@ -21,14 +21,8 @@
 
 class Application {
 public:
-	static GLuint shader_id;
 	static GLFWwindow *window;
-	static Shader shader; 
-
 	static Renderer renderer;
-
-	static bool enable_3d;
-	static light_info light;
 
 	static bool should_close() {
 		return glfwWindowShouldClose(window);
@@ -60,46 +54,44 @@ public:
 		//glfwSetCursorPosCallback(window, cursor_position_callback);
 	}
 
-	static GLint un_matrix_id;
-
-	static void init_shader_components() {
-		gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-		shader_id = shader.load_shaders("src/shaders/shader.vert", "src/shaders/shader.frag");
-		shader.init_matrix(&shader.pr_matrix_id, "pr_matrix");
-		//shader.init_matrix(&shader.ml_matrix_id, "ml_matrix");
-		shader.init_matrix(&shader.vw_matrix_id, "vw_matrix");
-		shader.init_matrix(&un_matrix_id, "uNMatrix");
-		cout << "un matrix id" << un_matrix_id << endl;
-		if (enable_3d) {
-			shader.init_light_locations();
-		}
-		glUseProgram(shader_id);
+	static void init_renderer_components() {
+		renderer.init_shader("src/shaders/shader.vert", "src/shaders/shader.frag");
+		renderer.init_camera(vec3(0.f, 0.f, 1.f));
+		//gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+		//shader_id = shader.load_shaders("src/shaders/shader.vert", "src/shaders/shader.frag");
+		//shader.init_matrix(&shader.pr_matrix_id, "pr_matrix");
+		////shader.init_matrix(&shader.ml_matrix_id, "ml_matrix");
+		//shader.init_matrix(&shader.vw_matrix_id, "vw_matrix");
+		//shader.init_matrix(&shader.un_matrix_id, "uNMatrix");
+		//if (enable_3d) {
+		//	shader.init_light_locations();
+		//}
 	}
 
-	static void upload_matrices() {
-		int width, height;
-		glfwGetFramebufferSize(window, &width, &height);
-		float ratio = width / (float)height;
-		glViewport(0, 0, width, height);
+	//static void upload_matrices() {
+	//	int width, height;
+	//	glfwGetFramebufferSize(window, &width, &height);
+	//	float ratio = width / (float)height;
+	//	glViewport(0, 0, width, height);
 
-		mat4 pr, vw;
-		if (enable_3d) {
-			pr = mat4::perspective_matrix(degreeToRadius(45), ratio, .1f, 500.f);
-			vw = mat4::look_at(vec3(0, 0, 2), vec3(0, 0, 1), vec3(0, 1, 0));
-		}
-		else {
-			pr = mat4::orthographic_matrix(-ratio, ratio, -1.f, 1.f, 1.f, -1.f);
-		}
-		mat3 un = mat3::from_mat4(vw);
-		un = un.transpose();
-		un = un.invert();
+	//	mat4 pr, vw;
+	//	if (enable_3d) {
+	//		pr = mat4::perspective_matrix(degreeToRadius(45), ratio, .1f, 500.f);
+	//		vw = mat4::look_at(camera.position, camera.position + camera.direction, vec3(0, 1, 0));
+	//	}
+	//	else {
+	//		pr = mat4::orthographic_matrix(-ratio, ratio, -1.f, 1.f, 1.f, -1.f);
+	//	}
+	//	mat3 un = mat3::from_mat4(vw);
+	//	un = un.transpose();
+	//	un = un.invert();
 
-		//shader.upload_matrix(ml, shader.ml_matrix_id);
-		shader.upload_matrix(vw, shader.vw_matrix_id);
-		glUniformMatrix3fv(un_matrix_id, 1, GL_FALSE, &un.elements[0]);
-		shader.upload_matrix(pr, shader.pr_matrix_id);
-		shader.upload_light_components();
-	}
+	//	//shader.upload_matrix(ml, shader.ml_matrix_id);
+	//	shader.upload_matrix(vw, shader.vw_matrix_id);
+	//	//glUniformMatrix3fv(shader.un_matrix_id, 1, GL_FALSE, &un.elements[0]);
+	//	shader.upload_matrix(pr, shader.pr_matrix_id);
+	//	shader.upload_light_components();
+	//}
 
 	/*
 		Imgui Components
@@ -119,6 +111,7 @@ public:
 		ImGui::NewFrame();
 
 		imgui_setup_menu();
+		imgui_setup_control_panel();
 		//ImGui::ShowDemoWindow();
 
 		ImGui::Render();
@@ -181,10 +174,9 @@ private:
 		ImGui::Begin("Layers");
 		{
 			if (ImGui::TreeNode("camera")) {
-				static float p1 = 0.f, p2 = 0.f, p3 = 0.f;
-				ImGui::PushItemWidth(50); ImGui::DragFloat("posx", &p1, 0.05f); ImGui::SameLine();
-				ImGui::PushItemWidth(50); ImGui::DragFloat("posy", &p2, 0.05f); ImGui::SameLine();
-				ImGui::PushItemWidth(50); ImGui::DragFloat("posz", &p3, 0.05f);
+				ImGui::PushItemWidth(50); ImGui::DragFloat("posx", &renderer.camera.position[0], 0.05f); ImGui::SameLine();
+				ImGui::PushItemWidth(50); ImGui::DragFloat("posy", &renderer.camera.position[1], 0.05f); ImGui::SameLine();
+				ImGui::PushItemWidth(50); ImGui::DragFloat("posz", &renderer.camera.position[2], 0.05f);
 				ImGui::TreePop();
 			}
 			int move_from = -1, move_to = -1;
@@ -334,8 +326,30 @@ private:
 
 	}
 
+	static void imgui_setup_control_panel() {
+		ImGui::Begin("Control");
+		{
+			if (ImGui::Button("Play"))
+			{
+				renderer.animated = true;
+				
+			}
+			if (ImGui::Button("Pause"))
+			{
+				renderer.animated = false;
+			}
+			if (ImGui::Button("Stop"))
+			{
+				cout << "click onbutton" << endl;
+			}
+			ImGui::SliderInt("frames ", &renderer.current_frame, 0, 29);
+		}
+		ImGui::End();
+	}
+
 	static void import_custom_object() {
 		customObject *o = new customObject("src/objects/cow.obj");
 		renderer.submit(o);
+		o->add_position_key_frame(30, vec3(0, 0, -1.f));
 	}
 };

@@ -5,6 +5,7 @@ layout(location = 1) in vec3 vertexNormal;
 
 uniform mat4 pr_matrix;
 uniform mat4 vw_matrix;
+uniform mat4 ml_matrix;
 
 uniform vec3 uLightPosition;
 uniform vec3 uAmbientLightColor;
@@ -16,12 +17,12 @@ uniform vec3 uKDiffuse;
 uniform vec3 uKSpecular;
 uniform float uShininess;
 
-uniform mat3 uNMatrix;
+mat3 uNMatrix = inverse(transpose(mat3(vw_matrix*ml_matrix)));
 
 out vec4 color;
 
 void main() {
-    vec4 vertexPositionEye4 = vw_matrix * vec4(vertexPostion, 1.0);
+    vec4 vertexPositionEye4 = vw_matrix * ml_matrix * vec4(vertexPostion, 1.0);
 
     vec3 vertexPositionEye3 = vertexPositionEye4.xyz / vertexPositionEye4.w;
 
@@ -89,5 +90,5 @@ void main() {
 
     //color = pr_matrix*vw_matrix*vec4(vertexPostion, 1.0);     
 
-    gl_Position = pr_matrix*vw_matrix*vec4(vertexPostion, 1.0);
+    gl_Position = pr_matrix*vw_matrix*ml_matrix*vec4(vertexPostion, 1.0);
 }

@@ -68,6 +68,14 @@ struct mat3
 		return out;
 	}
 
+	const float &operator[](int index) const {
+		return elements[index];
+	}
+
+	float &operator[](int index) {
+		return elements[index];
+	}
+
 	friend std::ostream& operator<<(std::ostream& s, mat3& m) {
 		float *e = m.elements;
 		s << "mat3: {" << "\n\t"

@@ -2,6 +2,7 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <utility>
 #include "../maths/maths.h"
 
 struct VertexArrayObject {
@@ -13,9 +14,14 @@ struct VertexArrayObject {
 
 class Layer {
 public:
-	Layer() {}
+	Layer() {
+		position = vec3(0.f, 0.f, 0.f);
+		rotation = vec3(0.f, 0.f, 0.f);
+	}
 
 	Layer(const char* s) {
+		position = vec3(0.f, 0.f, 0.f);
+		rotation = vec3(0.f, 0.f, 0.f);
 		name = _strdup(s);
 	}
 
@@ -39,6 +45,27 @@ public:
 			data[6 * i + 1] += y;
 		}
 		*/
+	}
+	struct key_frame_compare {
+		bool operator()(const pair<int, vec3>& left, const pair<int, vec3>& right) {
+			return left.first < right.first;
+		}
+	};
+
+	void add_position_key_frame(int frame, const vec3& pos) {
+		pair<int, vec3> new_key_frame = make_pair(frame, pos);
+		if (key_position.empty()) {
+			key_position.push_back(new_key_frame);
+		}
+		else {
+			vector<pair<int, vec3>>::iterator lower = lower_bound(key_position.begin(), key_position.end(), new_key_frame, key_frame_compare());
+			if ((*lower).first == frame) {
+				(*lower).second = pos;
+			}
+			else {
+				key_position.insert(lower, new_key_frame);
+			}
+		}
 	}
 
 	void load_buffers() {
@@ -68,7 +95,9 @@ public:
 
 	virtual bool is_inside_object(float, float) = 0;
 
-protected:
+//protected:
 	VertexArrayObject buffers;
+	vec3 position, rotation;
+	vector<pair<int, vec3>> key_position, key_rotation;
 	char* name;
 };

@@ -23,7 +23,7 @@ struct light_info {
 class Shader
 {
 public:
-	GLint pr_matrix_id, vw_matrix_id, ml_matrix_id;
+	GLint pr_matrix_id, vw_matrix_id, ml_matrix_id, un_matrix_id;
 
 	Shader() {}
 	GLuint load_shaders(const char *, const char *);
@@ -32,6 +32,8 @@ public:
 
 	void init_light_locations();
 	void upload_light_components();
+
+	inline GLuint get_shader_id() { return shader_id; }
 	~Shader();
 
 private:

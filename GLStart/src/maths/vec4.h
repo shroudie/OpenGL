@@ -15,8 +15,16 @@ struct vec4 {
 		this->elements[3] = w;
 	}
 
+	const float &operator[](int index) const {
+		return elements[index];
+	}
+
+	float &operator[](int index) {
+		return elements[index];
+	}
+
 	friend std::ostream& operator<<(std::ostream& s, const vec4& v) {
-		s << "vec4: (" << v.x << ", " << v.y << ", " << v.z << ", " << v.w << ")";
+		s << "vec4: (" << v[0] << ", " << v[1] << ", " << v[2] << ", " << v[3] << ")";
 		return s;
 	}
 };

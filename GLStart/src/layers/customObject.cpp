@@ -44,24 +44,20 @@ void customObject::generate_normals()
 		vec3 v21 = v2vec - v1vec, v31 = v3vec - v1vec;
 		vec3 n = vec3::cross_product(v21, v31);
 
-		buffers.normals[3 * v1] += n.x;
-		buffers.normals[3 * v1 + 1] += n.y;
-		buffers.normals[3 * v1 + 2] += n.z;
-		buffers.normals[3 * v2] += n.x;
-		buffers.normals[3 * v2 + 1] += n.y;
-		buffers.normals[3 * v2 + 2] += n.z;
-		buffers.normals[3 * v3] += n.x;
-		buffers.normals[3 * v3 + 1] += n.y;
-		buffers.normals[3 * v3 + 2] += n.z;
+		buffers.normals[3 * v1] += n[0];
+		buffers.normals[3 * v1 + 1] += n[1];
+		buffers.normals[3 * v1 + 2] += n[2];
+		buffers.normals[3 * v2] += n[0];
+		buffers.normals[3 * v2 + 1] += n[1];
+		buffers.normals[3 * v2 + 2] += n[2];
+		buffers.normals[3 * v3] += n[0];
+		buffers.normals[3 * v3 + 1] += n[1];
+		buffers.normals[3 * v3 + 2] += n[2];
 	}
 	for (unsigned int i = 0; i < buffers.normals.size(); i += 3) {
 		vec3 n = vec3::normalize(vec3(buffers.normals[i], buffers.normals[i + 1], buffers.normals[i + 2]));
-		//printf("%.2f, %.2f, %.2f\n", n.x, n.y, n.z);
-		if (n.z < 0.f) {
-			//n.z = -n.z;
-		}
-		buffers.normals[i] = n.x;
-		buffers.normals[i+1] = n.y;
-		buffers.normals[i+2] = n.z;
+		buffers.normals[i] = n[0];
+		buffers.normals[i+1] = n[1];
+		buffers.normals[i+2] = n[2];
 	}
 }

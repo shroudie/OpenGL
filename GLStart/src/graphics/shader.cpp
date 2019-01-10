@@ -2,6 +2,8 @@
 
 GLuint Shader::load_shaders(const char * vertex_fp, const char * fragment_fp)
 {
+	gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+
 	string vs = read_file(vertex_fp);
 	char *vert_shader_text = new char[vs.size()];
 	strcpy(vert_shader_text, vs.c_str());
@@ -43,6 +45,7 @@ GLuint Shader::load_shaders(const char * vertex_fp, const char * fragment_fp)
 	glAttachShader(shader_id, vertexShaderID);
 	glAttachShader(shader_id, fragmentShaderID);
 	glLinkProgram(shader_id);
+	glUseProgram(shader_id);
 
 	glDeleteShader(vertexShaderID);
 	glDeleteShader(fragmentShaderID);
