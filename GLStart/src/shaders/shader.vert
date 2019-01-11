@@ -20,8 +20,10 @@ uniform float uShininess;
 mat3 uNMatrix = inverse(transpose(mat3(vw_matrix*ml_matrix)));
 
 out vec4 color;
+out vec3 position;
 
 void main() {
+	position = vertexPostion;
     vec4 vertexPositionEye4 = vw_matrix * ml_matrix * vec4(vertexPostion, 1.0);
 
     vec3 vertexPositionEye3 = vertexPositionEye4.xyz / vertexPositionEye4.w;

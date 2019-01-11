@@ -63,6 +63,9 @@
     <ClCompile Include="src\layers\customObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\textures\texture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\maths\vec3.h">
@@ -137,6 +140,9 @@
     <ClInclude Include="src\maths\mat3.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\textures\texture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\shaders\shader.vert" />
@@ -146,5 +152,10 @@
     <ResourceCompile Include="GLStart.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\..\..\..\Downloads\CS 418\HelloEnvironmentMapSolution\neg-x.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

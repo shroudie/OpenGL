@@ -65,6 +65,7 @@ public:
 	inline void renderer_start() { animated = true; }
 
 //private:
+	GLuint shader_id;
 	deque<Layer*> layers;
 	vector<ShaderMatrix> matrices;
 

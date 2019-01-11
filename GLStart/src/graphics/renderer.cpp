@@ -88,18 +88,18 @@ Renderer::~Renderer()
 
 void Renderer::init_shader(const char *vert_fp, const char *frag_fp)
 {
-	GLuint id = shader.load_shaders(vert_fp, frag_fp);
+	shader_id = shader.load_shaders(vert_fp, frag_fp);
 	shader.init_light_locations();
 	shader.upload_light_components();
 
 	float ratio = 1280.f / 720.f;
 	mat4 pr = mat4::perspective_matrix(degreeToRadius(45), ratio, .1f, 500.f);
-	glUniformMatrix4fv(glGetUniformLocation(id, "pr_matrix"), 1, GL_FALSE, &pr.elements[0]);
+	glUniformMatrix4fv(glGetUniformLocation(shader_id, "pr_matrix"), 1, GL_FALSE, &pr.elements[0]);
 	
 
-	ShaderMatrix view(shader.get_shader_id(), "vw_matrix");
+	ShaderMatrix view(shader_id, "vw_matrix");
 	view.myf = &glUniformMat4fWrapper;
-	ShaderMatrix model(shader.get_shader_id(), "ml_matrix");
+	ShaderMatrix model(shader_id, "ml_matrix");
 	model.myf = &glUniformMat4fWrapper;
 
 	matrices.push_back(view);

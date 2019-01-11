@@ -1,19 +1,14 @@
 #pragma once
 
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
 
-#include "graphics/shader.h"
 #include "graphics/renderer.h"
 #include "layers/solid.h"
 #include "layers/shape.h"
 #include "layers/customObject.h"
 #include "layers/curves/bezier.h"
-
 #include <deque>
 
 #define GLSL_VERSION "#version 130"
@@ -56,7 +51,7 @@ public:
 
 	static void init_renderer_components() {
 		renderer.init_shader("src/shaders/shader.vert", "src/shaders/shader.frag");
-		renderer.init_camera(vec3(0.f, 0.f, 1.f));
+		renderer.init_camera(vec3(0.f, 0.f, 16.f));
 		//gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 		//shader_id = shader.load_shaders("src/shaders/shader.vert", "src/shaders/shader.frag");
 		//shader.init_matrix(&shader.pr_matrix_id, "pr_matrix");
@@ -348,8 +343,9 @@ private:
 	}
 
 	static void import_custom_object() {
-		customObject *o = new customObject("src/objects/cow.obj");
+		customObject *o = new customObject("src/objects/teapot.obj");
 		renderer.submit(o);
 		o->add_position_key_frame(30, vec3(0, 0, -1.f));
+		o->add_texture("src/textures/texture.png", renderer.shader_id);
 	}
 };
