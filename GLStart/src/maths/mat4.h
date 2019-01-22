@@ -160,8 +160,8 @@ struct mat4
 		return vec4(r0, r1, r2, r3);
 	}
 
-	friend std::ostream& operator<<(std::ostream& s, mat4& m) {
-		float *e = m.elements;
+	friend std::ostream& operator<<(std::ostream& s, const mat4& m) {
+		const float *e = m.elements;
 		s << "mat4: {" << "\n\t"
 			<< e[0] << ", " << e[1] << ", " << e[2] << ", " << e[3] << "\n\t"
 			<< e[4] << ", " << e[5] << ", " << e[6] << ", " << e[7] << "\n\t"

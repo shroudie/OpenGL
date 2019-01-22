@@ -15,6 +15,12 @@ struct VertexArrayObject {
 	vector<GLuint> indices;
 };
 
+struct TextureObject {
+	GLuint texture_id;
+	GLint skybox_location;
+	GLenum texture_target;
+};
+
 class Layer {
 public:
 	Layer() {
@@ -30,6 +36,7 @@ public:
 
 	~Layer() {
 		free(name);
+		delete textures;
 	}
 
 	void set_layer_name(const char *s) {
@@ -86,27 +93,25 @@ public:
 	}
 
 	//TODO: is it necessary to unbind on each draw?
-	void draw() {
+	virtual void draw() {
 		glBindBuffer(GL_ARRAY_BUFFER, buffers.vbo[0]);
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 		glBindBuffer(GL_ARRAY_BUFFER, buffers.vbo[1]);
 		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
-		if (apply_texture) {
-			glUniform1i(texture_location, true);
-			glBindTexture(GL_TEXTURE_CUBE_MAP, texture_id);
-			//cout << "binding texture: " << texture_id << endl;
+		if (textures) {
+			glBindTexture(textures->texture_target, textures->texture_id);
+			//cout << "binding texture: " << textures->texture_id << endl;
 			//gl.uniform1i(gl.getUniformLocation(shaderProgram, "uCubeSampler"), 0);
 		}
-		else {
-			//cout << "not binding texture: " << texture_id << endl;
-			glUniform1i(texture_location, false);
-			glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-		}
-
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers.vbo[2]);
 		glDrawElements(GL_TRIANGLES, buffers.indices.size(), GL_UNSIGNED_INT, 0);
 	}
+
+	//void init_uniform_locations(GLuint shader_id) {
+	//	apply_texture = glGetUniformLocation(shader_id, "use_texture");
+	//	apply_light = glGetUniformLocation(shader_id, "use_light");
+	//}
 
 	bool add_texture(const char *fp, GLuint shader_id) {
 		FILE *fs = fopen(fp, "rb");
@@ -171,11 +176,17 @@ public:
 			row_pointers[height - 1 - i] = image_data + i * rowbytes;
 		png_read_image(png_ptr, row_pointers);
 
+		textures = new TextureObject();
+
+		GLuint texture_id;
 		glGenTextures(1, &texture_id);
-		if (two_dimentional) {
+		if (false) {
 			glBindTexture(GL_TEXTURE_2D, texture_id);
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, (GLvoid*)image_data);
 			//glBindTexture(GL_TEXTURE_2D, 0);
+			textures->texture_target = GL_TEXTURE_2D;
+
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		}
 		else {
 			glBindTexture(GL_TEXTURE_CUBE_MAP, texture_id);
@@ -183,38 +194,45 @@ public:
 			{
 				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, (GLvoid*)image_data);
 			}
-			//glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-		}
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			textures->texture_target = GL_TEXTURE_CUBE_MAP;
 
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		}
 
 		png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
 		delete[] image_data;
 		delete[] row_pointers;
 
 		fclose(fs);
-		apply_texture = true;
-		texture_location = glGetUniformLocation(shader_id, "apply_texture");
-		skybox_location = glGetUniformLocation(shader_id, "skybox");
-		cout << "textureu" << texture_location << " skybox" << skybox_location << endl;
+
+		textures->texture_id = texture_id;
+		textures->skybox_location = glGetUniformLocation(shader_id, "skybox");
 		return true;
+	}
+
+	mat4 get_transformation_matrix() {
+		return mat4::translation_matrix(position);
+	}
+
+	void set_accept_light(bool b) {
+		accept_light = b;
 	}
 
 	virtual bool is_inside_object(float, float) = 0;
 
 //protected:
 	VertexArrayObject buffers;
-	vec3 position, rotation;
 
+	TextureObject *textures;
+
+	bool accept_light = false;
+
+	vec3 position, rotation;
 	vector<pair<int, vec3>> key_position, key_rotation;
 
-
-	bool apply_texture = false, two_dimentional = true;
-	GLint texture_location = -1, skybox_location = -1;
-	GLuint texture_id = 0;
-	
 	char* name;
 };

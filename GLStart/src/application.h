@@ -8,6 +8,7 @@
 #include "layers/solid.h"
 #include "layers/shape.h"
 #include "layers/customObject.h"
+#include "layers/light.h"
 #include "layers/curves/bezier.h"
 #include <deque>
 
@@ -52,6 +53,7 @@ public:
 	static void init_renderer_components() {
 		renderer.init_shader("src/shaders/shader.vert", "src/shaders/shader.frag");
 		renderer.init_camera(vec3(0.f, 0.f, 16.f));
+		renderer.init_uniform_locations();
 		//gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 		//shader_id = shader.load_shaders("src/shaders/shader.vert", "src/shaders/shader.frag");
 		//shader.init_matrix(&shader.pr_matrix_id, "pr_matrix");
@@ -175,13 +177,11 @@ private:
 				ImGui::TreePop();
 			}
 			int move_from = -1, move_to = -1;
-			for (unsigned int i = 0; i < renderer.count(); i++) {
+			for (unsigned int i = 0; i < renderer.layers.size(); i++) {
 				if (ImGui::TreeNode(renderer.layer_name(i))) {
-					if (ImGui::TreeNode("position")) {
-						static float f1 = 1.00f, f2 = 0.0067f;
-						ImGui::DragFloat("drag float", &f1, 0.005f);
-						ImGui::TreePop();
-					}
+					ImGui::PushItemWidth(50); ImGui::DragFloat("posx", &renderer.layers[i]->position[0], 0.05f); ImGui::SameLine();
+					ImGui::PushItemWidth(50); ImGui::DragFloat("posy", &renderer.layers[i]->position[1], 0.05f); ImGui::SameLine();
+					ImGui::PushItemWidth(50); ImGui::DragFloat("posz", &renderer.layers[i]->position[2], 0.05f);
 					ImGui::TreePop();
 				}
 				if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
@@ -342,10 +342,25 @@ private:
 		ImGui::End();
 	}
 
+	static void imgui_setup_effect_panel() {
+		ImGui::Begin("Visualization");
+		{
+
+
+
+		}
+		ImGui::End();
+	}
+
 	static void import_custom_object() {
 		customObject *o = new customObject("src/objects/teapot.obj");
 		renderer.submit(o);
 		o->add_position_key_frame(30, vec3(0, 0, -1.f));
+		//o->init_texture_loaded_location(renderer.shader_id);
 		o->add_texture("src/textures/texture.png", renderer.shader_id);
+
+		Light *lightsrc = new Light(renderer.shader_id);
+		renderer.submit(lightsrc);
+		renderer.set_accept_light();
 	}
 };

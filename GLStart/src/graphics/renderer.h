@@ -56,9 +56,10 @@ public:
 	void init_camera(vec3 pos);
 	void submit(Layer*);
 	void flush();
+	void set_accept_light();
 	void move(int, int);
 	void register_camera(const Camera& c);
-	inline unsigned int count() { return layers.size(); }
+	void init_uniform_locations();
 	inline const char* layer_name(unsigned int i) { return layers[i]->get_layer_name(); }
 	inline const vec3& camera_position() { return camera.position; }
 	inline const vec3& target_position() { return camera.position + camera.direction; }
@@ -72,7 +73,9 @@ public:
 	Camera camera;
 	Shader shader;
 
+	GLint use_light_loc, use_texture_loc;
+
 	int frame_count = 30, current_frame = 0;
 	float ms_per_frame = 15 / (float)frame_count;
-	bool animated = false; 
+	bool animated = false;
 };

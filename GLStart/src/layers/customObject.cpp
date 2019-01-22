@@ -5,7 +5,6 @@
 
 customObject::customObject(const char* fs)
 {
-	this->two_dimentional = false;
 	this->set_layer_name("custom object");
 	string line;
 	ifstream infile(fs);

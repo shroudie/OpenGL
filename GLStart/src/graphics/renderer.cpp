@@ -24,6 +24,13 @@ void Renderer::submit(Layer* l)
 	layers.push_back(l);
 }
 
+void Renderer::set_accept_light()
+{
+	for (deque<Layer*>::iterator it = layers.begin(); it != layers.end(); ++it) {
+		(*it)->set_accept_light(true);
+	}
+}
+
 void Renderer::flush()
 {
 	if (animated) {
@@ -43,21 +50,29 @@ void Renderer::flush()
 		}
 	}
 
-
 	mat4 vw = mat4::look_at(camera.position, camera.position + camera.direction, vec3(0, 1, 0));
-	matrices[0].matrix = &vw;
-	matrices[0].upload_matrix();	
-
 	for (deque<Layer*>::iterator it = layers.begin(); it != layers.end(); ++it) {
+		glUniform1i(use_texture_loc, (*it)->textures!=NULL);
+		glUniform1i(use_light_loc, (*it)->accept_light);
+		mat4 uploaded;
 		if (!(*it)->key_position.empty()) {
 			vec3 pos = (*it)->key_position[0].second * (current_frame / (float)frame_count);
-			mat4 model = mat4::translation_matrix(pos);
-			matrices[1].matrix = &model;
+			uploaded = vw * mat4::translation_matrix(pos);
 		}
 		else {
-			matrices[1].matrix = &mat4::identity_matrix();
+			uploaded = vw * mat4::identity_matrix();
 		}
+		//cout << it - layers.begin() << ": " << ((*it)->get_transformation_matrix()) << endl;
+		uploaded = uploaded * (*it)->get_transformation_matrix();
+		//cout << it - layers.begin() << ": " << vw << endl;
+		matrices[0].matrix = &uploaded;
+		matrices[0].upload_matrix();
+
+		mat3 un = mat3::from_mat4(uploaded);
+		un = (un.transpose()).invert();
+		matrices[1].matrix = &un;
 		matrices[1].upload_matrix();
+
 		(*it)->draw();
 	}
 }
@@ -89,18 +104,16 @@ Renderer::~Renderer()
 void Renderer::init_shader(const char *vert_fp, const char *frag_fp)
 {
 	shader_id = shader.load_shaders(vert_fp, frag_fp);
-	shader.init_light_locations();
-	shader.upload_light_components();
 
 	float ratio = 1280.f / 720.f;
 	mat4 pr = mat4::perspective_matrix(degreeToRadius(45), ratio, .1f, 500.f);
 	glUniformMatrix4fv(glGetUniformLocation(shader_id, "pr_matrix"), 1, GL_FALSE, &pr.elements[0]);
-	
+
 
 	ShaderMatrix view(shader_id, "vw_matrix");
 	view.myf = &glUniformMat4fWrapper;
-	ShaderMatrix model(shader_id, "ml_matrix");
-	model.myf = &glUniformMat4fWrapper;
+	ShaderMatrix model(shader_id, "un_matrix");
+	model.myf = &glUniformMat3fWrapper;
 
 	matrices.push_back(view);
 	matrices.push_back(model);
@@ -109,4 +122,10 @@ void Renderer::init_shader(const char *vert_fp, const char *frag_fp)
 void Renderer::init_camera(vec3 pos = vec3(0.f, 0.f, 1.f))
 {
 	camera.move(pos[0], pos[1], pos[2]);
+}
+
+void Renderer::init_uniform_locations()
+{
+	use_texture_loc = glGetUniformLocation(shader_id, "use_texture");
+	use_light_loc = glGetUniformLocation(shader_id, "use_light");
 }

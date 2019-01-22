@@ -63,7 +63,7 @@
     <ClCompile Include="src\layers\customObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\textures\texture.cpp">
+    <ClCompile Include="src\layers\light.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -140,13 +140,26 @@
     <ClInclude Include="src\maths\mat3.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\textures\texture.h">
+    <ClInclude Include="src\layers\light.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\audios\audiostream.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\maths\complex.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\maths\fft.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\shaders\shader.vert" />
     <None Include="src\shaders\shader.frag" />
+    <None Include="src\shaders\Shader_equalizer.frag" />
+    <None Include="src\shaders\Shader_spectrum.frag" />
+    <None Include="src\shaders\Shader_wave.frag" />
+    <None Include="src\shaders\wave.vert" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="GLStart.rc">
